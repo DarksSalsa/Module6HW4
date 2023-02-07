@@ -3,6 +3,7 @@ using MVC.Dtos;
 using MVC.Models.Enums;
 using MVC.Services.Interfaces;
 using MVC.ViewModels;
+using MVC.Models.Requests;
 
 namespace MVC.Services;
 
@@ -11,12 +12,14 @@ public class CatalogService : ICatalogService
     private readonly IOptions<AppSettings> _settings;
     private readonly IHttpClientService _httpClient;
     private readonly ILogger<CatalogService> _logger;
+    private readonly IHttpContextAccessor _context;
 
-    public CatalogService(IHttpClientService httpClient, ILogger<CatalogService> logger, IOptions<AppSettings> settings)
+    public CatalogService(IHttpClientService httpClient, ILogger<CatalogService> logger, IOptions<AppSettings> settings, IHttpContextAccessor context)
     {
         _httpClient = httpClient;
         _settings = settings;
         _logger = logger;
+        _context = context;
     }
 
     public async Task<Catalog<CatalogItem>> GetCatalogItems(int page, int take, int? brand, int? type)
@@ -72,7 +75,18 @@ public class CatalogService : ICatalogService
 
     public async Task LogInfoFromBasket()
     {
-        var resultFromMessage = await _httpClient.SendAsync<TextModel, object>($"{_settings.Value.BasketUrl}/LogMessage", HttpMethod.Post, null);
-        var resultFromUserIdMessage = await _httpClient.SendAsync<TextModel, object>($"{_settings.Value.BasketUrl}/LogUserId", HttpMethod.Post, null);
+        if (_context.HttpContext.User.Identity.IsAuthenticated)
+        {
+            var userId = _context.HttpContext.User.Identity.Name;
+            await _httpClient.SendAsync<TextModel, TextRequest>($"{_settings.Value.BasketUrl}/LogUserId", HttpMethod.Post,
+                new TextRequest()
+                {
+                    UserId = userId
+                });
+        }
+        else
+        {
+            await _httpClient.SendAsync<TextModel, object>($"{_settings.Value.BasketUrl}/LogMessage", HttpMethod.Post, null);
+        }   
     }
 }

@@ -50,13 +50,15 @@ namespace Basket.Services
             _logger.Log(LogLevel.Information, "Information");
         }
 
-        public void GetUserIdFromContext()
+        public void GetUserIdFromContext(string? userId)
         {
-            var result = _context.HttpContext.User.Identity.Name;
-            if (result != null)
+            if (userId != null)
             {
-                _logger.Log(LogLevel.Critical, result.ToString());
+                _logger.Log(LogLevel.Critical, userId);
+                return;
             }
+
+            _logger.Log(LogLevel.Critical, "UserId was not found.");
         }
     }
 }

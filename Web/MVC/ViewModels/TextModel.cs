@@ -2,6 +2,6 @@
 {
     public class TextModel
     {
-        public string Text { get; set; } = "Ok";
+        public string Text { get; set; }
     }
 }

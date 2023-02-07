@@ -5,6 +5,7 @@ using Basket.Models.Responses;
 using System.Net;
 using Basket.Services.Interfaces;
 using Infrastructure;
+using Basket.Models.Requests;
 
 namespace Basket.Controllers
 {
@@ -32,10 +33,11 @@ namespace Basket.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(TextResponse), (int)HttpStatusCode.OK)]
-        public IActionResult LogUserId()
+        public IActionResult LogUserId(TextRequest request)
         {
-            _basketService.GetUserIdFromContext();
+            _basketService.GetUserIdFromContext(request.UserId);
             return Ok(new TextResponse() { Text = "Logged user id" });
         }
     }
